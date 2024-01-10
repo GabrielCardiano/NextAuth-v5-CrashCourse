@@ -61,6 +61,26 @@ export function RegisterForm() {
         >
           <div className="space-y-4">
 
+               {/* Name form-field */}
+               <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      disabled={isPending}
+                      placeholder="John Doe"
+                      type="text"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {/* Email form-field */}
             <FormField
               control={form.control}
@@ -94,26 +114,6 @@ export function RegisterForm() {
                       disabled={isPending}
                       placeholder="******"
                       type="password"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Name form-field */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled={isPending}
-                      placeholder="John Doe"
-                      type="text"
                     />
                   </FormControl>
                   <FormMessage />
