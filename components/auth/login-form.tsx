@@ -14,6 +14,7 @@ import { CardWrapper } from "@/components/auth/card-wrapper";
 import FormError from "@/components/form-error";
 import FormSuccess from "../form-success";
 import { login } from "@/actions/login";
+import { useSearchParams } from "next/navigation";
 
 
 
@@ -21,6 +22,10 @@ export function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>('');
   const [success, setSuccess] = useState<string | undefined>('');
+
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get('error') === 'OAuthAccountNotLinked'
+    ? 'Email already used in a different account' : '';
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -38,10 +43,11 @@ export function LoginForm() {
 
     startTransition(() => {
       login(values)
-      .then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
-      })
+        .then((data) => {
+          setError(data?.error);
+          // TODO: Add when we add 2FA (two factor authentication)
+          // setSuccess(data?.success);
+        })
 
     });
   }
@@ -102,7 +108,7 @@ export function LoginForm() {
           </div>
 
           {/* Error/Success login notification */}
-          <FormError message={error} />
+          <FormError message={error || urlError} />
           <FormSuccess message={success} />
 
           {/* Submit button */}
