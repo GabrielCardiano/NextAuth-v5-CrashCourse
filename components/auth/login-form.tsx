@@ -45,8 +45,7 @@ export function LoginForm() {
       login(values)
         .then((data) => {
           setError(data?.error);
-          // TODO: Add when we add 2FA (two factor authentication)
-          // setSuccess(data?.success);
+          setSuccess(data?.success);
         })
 
     });
