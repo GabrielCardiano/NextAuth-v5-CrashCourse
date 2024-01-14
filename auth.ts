@@ -34,10 +34,10 @@ export const {
 
   callbacks: {
     async signIn({ user, account }) {
-      // Allow OAuth wthout email verification 
+      // Allow any OAuth login (google/github)
       if (account?.provider !== 'credentials') return true;
 
-      // Block sign in without email verification
+      // Block sign in for 'credential' login without email verification
       const exististingUser = await getUserById(user.id);
       if (!exististingUser?.emailVerified) return false; 
 
