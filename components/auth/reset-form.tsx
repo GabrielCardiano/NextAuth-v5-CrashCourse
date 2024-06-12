@@ -5,45 +5,39 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 
-import { LoginSchema } from "@/schemas";
+import { ResetSchema } from "@/schemas";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import FormError from "@/components/form-error";
 import FormSuccess from "../form-success";
-import { login } from "@/actions/login";
-import { useSearchParams } from "next/navigation";
+import { reset } from "@/actions/reset";
 
-
-
-export function LoginForm() {
+export function ResetForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>('');
   const [success, setSuccess] = useState<string | undefined>('');
 
-  const searchParams = useSearchParams();
-  const urlError = searchParams.get('error') === 'OAuthAccountNotLinked'
-    ? 'Email already used in a different account' : '';
-
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof ResetSchema>>({
+    resolver: zodResolver(ResetSchema),
     defaultValues: {
       email: '',
-      password: ''
     },
   });
 
   //* This project submit data from client to server using server actions */
   /*  API route could be another way --> axios.post('/api/route', values); */
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = (values: z.infer<typeof ResetSchema>) => {
     setError('');
     setSuccess('');
 
+    console.log(values);
+
+
     startTransition(() => {
-      login(values)
+      reset(values)
         .then((data) => {
           setError(data?.error);
           setSuccess(data?.success);
@@ -54,10 +48,9 @@ export function LoginForm() {
 
   return (
     <CardWrapper
-      headerLabel="Welcome back"
-      backButtonLabel="Don't you have an account?"
-      backButtonHref="/auth/register"
-      showSocial
+      headerLabel="Forgot your password?"
+      backButtonLabel="Back to login"
+      backButtonHref="/auth/login"
     >
       <Form {...form}>
         <form
@@ -87,37 +80,11 @@ export function LoginForm() {
             />
 
             {/* Password form-field */}
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled={isPending}
-                      placeholder="******"
-                      type="password"
-                    />
-                  </FormControl>
 
-                  <Button
-                    size="sm"
-                    variant="link"
-                    asChild
-                    className="px-0 font-normal"
-                  >
-                    <Link href="/auth/reset">Forgot password?</Link>
-                  </Button>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
 
           {/* Error/Success login notification */}
-          <FormError message={error || urlError} />
+          <FormError message={error} />
           <FormSuccess message={success} />
 
           {/* Submit button */}
@@ -126,7 +93,7 @@ export function LoginForm() {
             className="w-full "
             disabled={isPending}
           >
-            Login
+            Send reset email
           </Button>
         </form>
       </Form>
