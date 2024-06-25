@@ -11,6 +11,7 @@ import { db } from "./lib/db";
 import authConfig from "@/auth.config";
 import { getUserById } from "@/data/user";
 import { UserRole } from "@prisma/client";
+import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
 
 export const {
   handlers: { GET, POST },
@@ -37,11 +38,22 @@ export const {
       // Allow any OAuth login (google/github)
       if (account?.provider !== 'credentials') return true;
 
-      // Block sign in for 'credential' login without email verification
       const exististingUser = await getUserById(user.id);
-      if (!exististingUser?.emailVerified) return false; 
+      
+      // Block sign in for 'credential' login without email verification
+      if (!exististingUser?.emailVerified) return false;
 
-      // TODO: Add 2FA check
+      // Check 2FA confirmation
+      if (exististingUser.isTwoFactorEnabled) {
+        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(exististingUser.id);
+
+        if (!twoFactorConfirmation) return false;
+
+        // Delete two factor confirmation for next sign in.
+        // Obs: Deleting manualy. We can also delete using expireAt in the schema. 
+        await db.twoFactorConfirmation.delete({ where: { id: twoFactorConfirmation.id } });
+      }
+
       return true;
     },
 
