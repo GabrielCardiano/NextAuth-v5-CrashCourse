@@ -9,7 +9,7 @@ import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
 import { getUserByEmail } from "@/data/user";
 import { generateVerificationToken, generateTwoFactorToken } from "@/lib/tokens";
-import { sendVerification, sendTwoFactorTokenEmail } from "@/lib/mail";
+import { sendVerificationEmail, sendTwoFactorTokenEmail } from "@/lib/mail";
 import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
 
@@ -31,7 +31,7 @@ export async function login(values: z.infer<typeof LoginSchema>) {
 
   if (!existingUser.emailVerified) {
     const verificationToken = await generateVerificationToken(existingUser.email);
-    await sendVerification(verificationToken.email, verificationToken.token);
+    await sendVerificationEmail(verificationToken.email, verificationToken.token);
     return { success: 'Confirmation email sent!' }
   }
 
