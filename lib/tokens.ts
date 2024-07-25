@@ -7,7 +7,10 @@ import { getPasswordResetTokenByEmail } from "@/data/password-reset-token";
 import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
 
 export const generateTwoFactorToken = async (email: string) => {
+  // generate random token
   const token = crypto.randomInt(100_000, 1_000_000).toString();
+
+  // generate expiring time for token
   const expires = new Date(new Date().getTime() + 5 * 60 * 1000); // expires in 5minutes
 
   const existingToken = await getTwoFactorTokenByEmail(email);

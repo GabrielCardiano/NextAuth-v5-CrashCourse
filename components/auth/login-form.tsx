@@ -31,6 +31,8 @@ export function LoginForm() {
   const [isPending, startTransition] = useTransition();
 
   const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
+
   const urlError =
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "Email already used in a different account"
@@ -51,7 +53,7 @@ export function LoginForm() {
     setSuccess("");
 
     startTransition(() => {
-      login(values)
+      login(values, callbackUrl)
         .then((data) => {
           if (data?.error) {
             form.reset();
@@ -89,7 +91,7 @@ export function LoginForm() {
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>A code was sento to your email</FormLabel>
+                    <FormLabel>A code was sent to your email</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -162,7 +164,7 @@ export function LoginForm() {
 
           {/* Submit button */}
           <Button type="submit" className="w-full " disabled={isPending}>
-            {showTwoFactor ? 'Confirm' : 'Login'}
+            {showTwoFactor ? "Confirm" : "Login"}
           </Button>
         </form>
       </Form>

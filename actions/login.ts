@@ -15,7 +15,10 @@ import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation
 
 import { db } from "@/lib/db";
 
-export async function login(values: z.infer<typeof LoginSchema>) {
+export async function login(
+  values: z.infer<typeof LoginSchema>,
+  callbackUrl?: string | null
+) {
   const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -37,11 +40,7 @@ export async function login(values: z.infer<typeof LoginSchema>) {
 
   if (existingUser.isTwoFactorEnabled && existingUser.email) {
     if (code) {
-      console.log({ code });
-
       const twoFactorToken = await getTwoFactorTokenByEmail(existingUser.email);
-      console.log({ twoFactorToken });
-
 
       if (!twoFactorToken) {
         return { error: 'Invalid code' }
@@ -58,10 +57,8 @@ export async function login(values: z.infer<typeof LoginSchema>) {
 
       await db.twoFactorToken.delete({ where: { id: twoFactorToken.id } });
 
-      console.log({ existingUser });
-
       const existingConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id);
-      console.log({ existingConfirmation });
+      
       if (existingConfirmation) {
         await db.twoFactorConfirmation.delete({ where: { id: existingConfirmation.id } })
       }
@@ -71,16 +68,15 @@ export async function login(values: z.infer<typeof LoginSchema>) {
     } else {
       const twoFactorToken = await generateTwoFactorToken(existingUser.email);
       await sendTwoFactorTokenEmail(twoFactorToken.email, twoFactorToken.token);
+      return { twoFactor: true };
     }
-    return { twoFactor: true };
   }
-
 
   try {
     await signIn('credentials', {
       email,
       password,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT,
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -91,7 +87,6 @@ export async function login(values: z.infer<typeof LoginSchema>) {
           return { error: 'Something went wrong!' }
       }
     }
-    console.log({ error });
 
     throw error;
   }

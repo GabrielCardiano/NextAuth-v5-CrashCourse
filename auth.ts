@@ -12,7 +12,7 @@ import authConfig from "@/auth.config";
 import { getUserById } from "@/data/user";
 import { UserRole } from "@prisma/client";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
-import { getAccountByUserId } from "./data/account";
+import { getAccountByUserId } from "@/data/account";
 
 export const {
   handlers: { GET, POST },
@@ -40,7 +40,7 @@ export const {
       if (account?.provider !== 'credentials') return true;
 
       const exististingUser = await getUserById(user.id);
-      
+
       // Block sign in for 'credential' login without email verification
       if (!exististingUser?.emailVerified) return false;
 

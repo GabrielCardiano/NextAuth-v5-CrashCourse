@@ -6,7 +6,7 @@ export const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const { nextUrl } = req;
-  const isLoggedin = !!req.auth;
+  const isLoggedIn = !!req.auth;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
@@ -17,15 +17,23 @@ export default auth((req) => {
 
   //  Allow navigate in public routes ['/auth/login', '/auth/register']. If already logged in redirect to "/settings"
   if (isAuthRoute) {
-    if (isLoggedin) {
+    if (isLoggedIn) {
       return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
     return null;
   }
 
   // If not logged in neither in a public route -> redirect to login
-  if (!isLoggedin && !isPublicRoute) {
-    return Response.redirect(new URL('/auth/login', nextUrl));
+  if (!isLoggedIn && !isPublicRoute) {
+    let callbackUrl = nextUrl.pathname;
+
+    if (nextUrl.search) {
+      callbackUrl += nextUrl.search;
+    }
+
+    const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+
+    return Response.redirect(new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
   }
 
   return null;
